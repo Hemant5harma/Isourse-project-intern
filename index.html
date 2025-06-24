@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DevOps CI/CD Project - Jenkins + GKE</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f7ff;
+      color: #333;
+    }
+    header {
+      background-color: #003366;
+      color: #fff;
+      padding: 1.2rem;
+      text-align: center;
+    }
+    main {
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      margin-top: 2rem;
+    }
+    h2 {
+      color: #003366;
+    }
+    section {
+      margin-bottom: 2rem;
+    }
+    code {
+      background: #eef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>CI/CD Pipeline using Jenkins and Google Kubernetes Engine (GKE)</h1>
+</header>
+
+<main>
+  <section>
+    <h2>🔧 Project Overview</h2>
+    <p>
+      This project implements a complete DevOps CI/CD pipeline using <strong>Jenkins</strong> for automation and <strong>Google Kubernetes Engine (GKE)</strong> for cloud-native deployment.
+    </p>
+  </section>
+
+  <section>
+    <h2>🚀 Tools & Technologies</h2>
+    <ul>
+      <li><strong>Jenkins:</strong> CI/CD automation server</li>
+      <li><strong>Docker:</strong> Containerize application</li>
+      <li><strong>GCP:</strong> Cloud provider for hosting Jenkins & deploying app</li>
+      <li><strong>GKE:</strong> Kubernetes cluster to run containers</li>
+      <li><strong>kubectl:</strong> CLI to manage Kubernetes resources</li>
+      <li><strong>GitHub:</strong> Source code hosting and integration</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>⚙️ CI/CD Pipeline Flow</h2>
+    <ol>
+      <li>Developer pushes code to GitHub</li>
+      <li>Jenkins detects the push and triggers the pipeline</li>
+      <li>Builds Docker image and pushes to Google Artifact Registry</li>
+      <li>Authenticates with GCP and updates Kubernetes deployment on GKE</li>
+      <li>Verifies successful rollout</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>📂 Jenkins Pipeline (Jenkinsfile)</h2>
+    <p>Example pipeline stages:</p>
+    <pre><code>
+pipeline {
+  agent any
+  stages {
+    stage('Checkout') { steps { git 'repo-url' } }
+    stage('Build') { steps { sh 'docker build -t gcr.io/project/image:$BUILD_NUMBER .' } }
+    stage('Push') { steps { sh 'docker push gcr.io/project/image:$BUILD_NUMBER' } }
+    stage('Deploy') {
+      steps {
+        sh 'gcloud container clusters get-credentials...'
+        sh 'kubectl set image deployment/app app=gcr.io/project/image:$BUILD_NUMBER'
+      }
+    }
+  }
+}
+    </code></pre>
+  </section>
+
+  <section>
+    <h2>💡 Error Handling Example</h2>
+    <p>When encountering a <strong>502 Bad Gateway</strong> error:</p>
+    <ol>
+      <li>Check if the app container is healthy using <code>kubectl logs</code></li>
+      <li>Inspect Load Balancer or Ingress configurations</li>
+      <li>Verify environment variables and service definitions</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>📈 Benefits</h2>
+    <ul>
+      <li>Full automation of build, test, deploy</li>
+      <li>Scalable infrastructure on Kubernetes</li>
+      <li>Quick rollback and monitoring support</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>📽️ Demo Video</h2>
+    <p>Watch the complete Jenkins + GKE CI/CD video tutorial:  
+      <a href="https://www.youtube.com/watch?v=ecTqBWP4k88" target="_blank">Watch on YouTube</a>
+    </p>
+  </section>
+</main>
+
+</body>
+</html>
