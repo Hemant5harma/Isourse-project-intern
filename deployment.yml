@@ -15,5 +15,6 @@ spec:
       containers:
         - name: nginx
           image: hemanthub/devops-intern-project:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80

@@ -63,6 +63,7 @@ pipeline {
             steps {
                 sh 'kubectl apply -f deployment.yml'
                 sh 'kubectl apply -f service.yml'
+                sh 'kubectl rollout restart deployment/nginx-app'
             }
         }
     }
