@@ -1,4 +1,4 @@
-# Isourse Project Intern - DevOps CI/CD Pipeline
+# Isourse Project - DevOps CI/CD Pipeline
 
 A complete DevOps CI/CD pipeline implementation using Jenkins for automation and Google Kubernetes Engine (GKE) for cloud-native deployment.
 
