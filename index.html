@@ -1,130 +1,524 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DevOps CI/CD Project - Jenkins + GKE</title>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f2f7ff;
-      color: #333;
-    }
-    header {
-      background-color: #003366;
-      color: #fff;
-      padding: 1.2rem;
-      text-align: center;
-    }
-    main {
-      padding: 2rem;
-      max-width: 900px;
-      margin: auto;
-      background-color: #fff;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border-radius: 8px;
-      margin-top: 2rem;
-    }
-    h2 {
-      color: #003366;
-    }
-    section {
-      margin-bottom: 2rem;
-    }
-    code {
-      background: #eef;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISource Intern Project - End-to-End CI/CD Pipeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 15px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.1) 10px,
+                rgba(255,255,255,0.1) 20px
+            );
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-info {
+            position: relative;
+            z-index: 2;
+            margin-top: 20px;
+        }
+
+        .header-info p {
+            font-size: 1.1rem;
+            margin: 5px 0;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+        }
+
+        .toc {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            color: white;
+        }
+
+        .toc h2 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .toc ol {
+            padding-left: 20px;
+        }
+
+        .toc li {
+            margin: 8px 0;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #4facfe;
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section h2 {
+            color: #4facfe;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #4facfe;
+            padding-bottom: 10px;
+        }
+
+        .tools-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .tools-table th,
+        .tools-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tools-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .tools-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .workflow-stages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stage {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-weight: 500;
+            transition: transform 0.3s ease;
+        }
+
+        .stage:hover {
+            transform: scale(1.05);
+        }
+
+        .architecture-diagram {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px dashed #4facfe;
+        }
+
+        .architecture-diagram p {
+            font-size: 1.2rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .screenshot-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .screenshot-item {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .screenshot-item h3 {
+            color: #4facfe;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .screenshot-placeholder {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            height: 300px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 15px 0;
+            border: 3px solid #4facfe;
+        }
+
+        .challenges {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .challenges ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .challenges li {
+            background: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .project-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .conclusion {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .workflow-stages {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>ISource Intern Project</h1>
+            <h2>End-to-End CI/CD Pipeline using Jenkins, Docker, and GKE</h2>
+            <div class="header-info">
+                <p><strong>Name:</strong> Hemant Sharma</p>
+                <p><strong>Date:</strong> 25 June 2025</p>
+                <div class="nav-links">
+                    <a href="http://34.121.33.77:80" target="_blank" class="nav-link">Visit Website</a>
+                    <a href="https://github.com/Hemant5harma/Isourse-project-intern" target="_blank" class="nav-link">GitHub Repository</a>
+                </div>
+            </div>
+        </div>
 
-<header>
-  <h1>CI/CD Pipeline using Jenkins and Google Kubernetes Engine (GKE)</h1>
-</header>
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ol>
+                <li>Introduction</li>
+                <li>Tools & Technologies Used</li>
+                <li>CI/CD Pipeline Workflow</li>
+                <li>Jenkinsfile Breakdown</li>
+                <li>Infrastructure Setup</li>
+                <li>Screenshots</li>
+                <li>Challenges & Resolutions</li>
+                <li>Conclusion</li>
+                <li>My Other Projects</li>
+            </ol>
+        </div>
 
-<main>
-  <section>
-    <h2>🔧 Project Overview</h2>
-    <p>
-      This project implements a complete DevOps CI/CD pipeline using <strong>Jenkins</strong> for automation and <strong>Google Kubernetes Engine (GKE)</strong> for cloud-native deployment.
-    </p>
-  </section>
+        <div class="section">
+            <h2>1. Introduction</h2>
+            <p>This project demonstrates the implementation of a CI/CD pipeline using Jenkins, Docker, and Google Kubernetes Engine (GKE). The pipeline automates code integration, Docker image creation, image upload to Docker Hub, and application deployment to Kubernetes.</p>
+        </div>
 
-  <section>
-    <h2>🚀 Tools & Technologies</h2>
-    <ul>
-      <li><strong>Jenkins:</strong> CI/CD automation server</li>
-      <li><strong>Docker:</strong> Containerize application</li>
-      <li><strong>GCP:</strong> Cloud provider for hosting Jenkins & deploying app</li>
-      <li><strong>GKE:</strong> Kubernetes cluster to run containers</li>
-      <li><strong>kubectl:</strong> CLI to manage Kubernetes resources</li>
-      <li><strong>GitHub:</strong> Source code hosting and integration</li>
-    </ul>
-  </section>
+        <div class="section">
+            <h2>2. Tools & Technologies Used</h2>
+            <table class="tools-table">
+                <thead>
+                    <tr>
+                        <th>Tool</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Jenkins</td>
+                        <td>CI/CD automation</td>
+                    </tr>
+                    <tr>
+                        <td>Docker</td>
+                        <td>Containerization</td>
+                    </tr>
+                    <tr>
+                        <td>GitHub</td>
+                        <td>Version control</td>
+                    </tr>
+                    <tr>
+                        <td>GKE</td>
+                        <td>Kubernetes deployment</td>
+                    </tr>
+                    <tr>
+                        <td>Google Cloud SDK</td>
+                        <td>GKE auth & config</td>
+                    </tr>
+                    <tr>
+                        <td>kubectl</td>
+                        <td>Kubernetes CLI</td>
+                    </tr>
+                    <tr>
+                        <td>Jenkins Plugins</td>
+                        <td>Email-ext, Docker, GKE credentials</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-  <section>
-    <h2>⚙️ CI/CD Pipeline Flow</h2>
-    <ol>
-      <li>Developer pushes code to GitHub</li>
-      <li>Jenkins detects the push and triggers the pipeline</li>
-      <li>Builds Docker image and pushes to Google Artifact Registry</li>
-      <li>Authenticates with GCP and updates Kubernetes deployment on GKE</li>
-      <li>Verifies successful rollout</li>
-    </ol>
-  </section>
+        <div class="section">
+            <h2>3. CI/CD Pipeline Workflow</h2>
+            <h3>Stages in the Pipeline:</h3>
+            <div class="workflow-stages">
+                <div class="stage">Git Clone</div>
+                <div class="stage">Test (Dummy)</div>
+                <div class="stage">Docker Image Build</div>
+                <div class="stage">Docker Push to Docker Hub</div>
+                <div class="stage">GKE Authentication</div>
+                <div class="stage">Kubernetes Deployment</div>
+            </div>
+            
+            <div class="architecture-diagram">
+                <h3>Architecture Diagram</h3>
+                <img src="images/archituecture.png" alt="CI/CD Pipeline Architecture" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+            </div>
+        </div>
 
-  <section>
-    <h2>📂 Jenkins Pipeline (Jenkinsfile)</h2>
-    <p>Example pipeline stages:</p>
-    <pre><code>
-pipeline {
-  agent any
-  stages {
-    stage('Checkout') { steps { git 'repo-url' } }
-    stage('Build') { steps { sh 'docker build -t gcr.io/project/image:$BUILD_NUMBER .' } }
-    stage('Push') { steps { sh 'docker push gcr.io/project/image:$BUILD_NUMBER' } }
-    stage('Deploy') {
-      steps {
-        sh 'gcloud container clusters get-credentials...'
-        sh 'kubectl set image deployment/app app=gcr.io/project/image:$BUILD_NUMBER'
-      }
-    }
-  }
-}
-    </code></pre>
-  </section>
+        <div class="section">
+            <h2>4. Jenkinsfile Breakdown</h2>
+            <p>The Jenkinsfile contains the following stages:</p>
+            <ul>
+                <li><strong>stage('Git Checkout')</strong> - Clones the repository</li>
+                <li><strong>stage('Test')</strong> - Executes a basic test</li>
+                <li><strong>stage('Build Docker Image')</strong> - Builds Docker image</li>
+                <li><strong>stage('Push Docker Image')</strong> - Pushes image to Docker Hub</li>
+                <li><strong>stage('Authenticate with GKE')</strong> - Connects to Google Kubernetes Engine</li>
+                <li><strong>stage('Deploy to Kubernetes')</strong> - Applies K8s manifests</li>
+            </ul>
+        </div>
 
-  <section>
-    <h2>💡 Error Handling Example</h2>
-    <p>When encountering a <strong>502 Bad Gateway</strong> error:</p>
-    <ol>
-      <li>Check if the app container is healthy using <code>kubectl logs</code></li>
-      <li>Inspect Load Balancer or Ingress configurations</li>
-      <li>Verify environment variables and service definitions</li>
-    </ol>
-  </section>
+        <div class="section">
+            <h2>5. Infrastructure Setup</h2>
+            <ul>
+                <li><strong>Google Cloud GKE:</strong> Configured a GKE cluster from the GCP console.</li>
+                <li><strong>Service Account:</strong> Created with Kubernetes Engine Admin role and used for Jenkins.</li>
+                <li><strong>Docker Hub Repo:</strong> Created hemanthub/devops-intern-project.</li>
+                <li><strong>Jenkins Setup:</strong> Installed plugins for Docker and GKE.</li>
+                <li><strong>Jenkins Credentials:</strong> Stored Docker Hub and GCP credentials securely.</li>
+            </ul>
+        </div>
 
-  <section>
-    <h2>📈 Benefits</h2>
-    <ul>
-      <li>Full automation of build, test, deploy</li>
-      <li>Scalable infrastructure on Kubernetes</li>
-      <li>Quick rollback and monitoring support</li>
-    </ul>
-  </section>
+        <div class="section">
+            <h2>6. Screenshots</h2>
+            <div class="screenshot-section">
+                <div class="screenshot-item">
+                    <h3>Jenkins Dashboard</h3>
+                    <p><em>Showing successful build</em></p>
+                    <img src="images/jenkins-dashboard.png" alt="Jenkins Dashboard" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                </div>
 
-  <section>
-    <h2>📽️ Demo Video</h2>
-    <p>Watch the complete Jenkins + GKE CI/CD video tutorial:  
-      <a href="https://www.youtube.com/watch?v=ecTqBWP4k88" target="_blank">Watch on YouTube</a>
-    </p>
-  </section>
-</main>
+                <div class="screenshot-item">
+                    <h3>Jenkins Pipeline with Stages</h3>
+                    <p><em>Stage View with step durations</em></p>
+                    <img src="images/jenkins-stage-view.png" alt="Jenkins Pipeline Stages" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                </div>
 
+                <div class="screenshot-item">
+                    <h3>Docker Hub</h3>
+                    <p><em>Pushed image hemanthub/devops-intern-project visible</em></p>
+                    <img src="images/docker-hub.png" alt="Docker Hub Repository" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                </div>
+
+                <div class="screenshot-item">
+                    <h3>GCP Console - GKE Workloads</h3>
+                    <p><em>Deployment and running pods</em></p>
+                    <img src="images/gke-workloads.png" alt="GKE Workloads Dashboard" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                </div>
+
+                <div class="screenshot-item">
+                    <h3>kubectl get all Output</h3>
+                    <p><em>Shows LoadBalancer IP and service details</em></p>
+                    <img src="images/kubectl-output.png" alt="kubectl Command Output" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                </div>
+
+                <div class="screenshot-item">
+                    <h3>Website Running & Exposed</h3>
+                    <p><em>Application accessible via external IP</em></p>
+                    <img src="images/live-website.png" alt="kubectl Command Output" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                </div>
+
+                <div class="screenshot-item">
+                    <h3>Mail Notification</h3>
+                    <p><em>Triggered post-deployment email alert</em></p>
+                    <img src="images/mail-nofitication.png" alt="Email Notification" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>7. Challenges & Resolutions</h2>
+            <div class="challenges">
+                <ul>
+                    <li><strong>GKE auth failure</strong> → Resolved by providing correct service account key JSON</li>
+                    <li><strong>Docker image push error</strong> → Fixed by configuring Docker Hub credentials in Jenkins</li>
+                    <li><strong>Jenkins Pipeline failure</strong> → Traced logs, identified GCP plugin version mismatch</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>8. Conclusion</h2>
+            <div class="conclusion">
+                <p>This project demonstrates a robust CI/CD pipeline that automates the complete lifecycle from code check-in to deployment on GKE. Tools like Jenkins, Docker, and Kubernetes have been successfully orchestrated to form a scalable DevOps workflow.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>9. My Other Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <h3>🚀 AWS Pipeline Project</h3>
+                    <p>Full AWS pipeline project using AWS CodePipeline, CodeCommit and CodeBuild</p>
+                </div>
+                <div class="project-card">
+                    <h3>⚙️ Jenkins CI/CD Pipeline</h3>
+                    <p>Full CI/CD pipeline using Jenkins, Kubernetes, Docker</p>
+                </div>
+                <div class="project-card">
+                    <h3>🌐 Ingress Controller</h3>
+                    <p>Creating ingress controller for traffic routed to different services</p>
+                </div>
+                <div class="project-card">
+                    <h3>📦 Kubernetes Deployment</h3>
+                    <p>Deploy application on Kubernetes cluster</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
