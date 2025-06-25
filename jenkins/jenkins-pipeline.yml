@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    environment {
+        PROJECT_ID = 'root-territory-454510-c5'
+        CLUSTER_NAME = 'gke-isource'
+        CLUSTER_ZONE = 'us-central1'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Hemant5harma/Isourse-project-intern.git'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo "Test done"
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh """
+                            docker build -t ${JOB_NAME}:${BUILD_ID} .
+                            docker tag ${JOB_NAME}:${BUILD_ID} hemanthub/${JOB_NAME}:${BUILD_ID}
+                            docker tag ${JOB_NAME}:${BUILD_ID} hemanthub/${JOB_NAME}:latest
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh """
+                            docker push hemanthub/${JOB_NAME}:${BUILD_ID}
+                            docker push hemanthub/${JOB_NAME}:latest
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Authenticate with GKE') {
+            steps {
+                withCredentials([file(credentialsId: 'gke-cred', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    sh """
+                        gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+                        gcloud config set project ${PROJECT_ID}
+                        gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${CLUSTER_ZONE}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f deployment.yml'
+                sh 'kubectl apply -f service.yml'
+            }
+        }
+    }
+
+    post {
+        success {
+            emailext (
+                subject: "Jenkins Job Success: ${env.JOB_NAME}",
+                body: "Good news! Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) finished successfully.\n\nCheck it here: ${env.BUILD_URL}",
+                to: '2021pietcshemant077@poornima.org'
+            )
+        }
+        failure {
+            emailext (
+                subject: "Jenkins Job Failed: ${env.JOB_NAME}",
+                body: "Oops! Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) failed.\n\nCheck details: ${env.BUILD_URL}",
+                to: '2021pietcshemant077@poornima.org'
+            )
+        }
+    }
+}
